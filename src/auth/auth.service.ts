@@ -5,28 +5,50 @@ import { TenantConnectionService } from 'src/services/tenant-connection.service'
 import { encrypt } from 'src/utils/encrypt';
 import { Secrets, SecretsSchema } from './secrets.schema';
 import CredentialsDto from './dtos/credentials.dto';
-import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { decrypt } from 'src/utils/decrypt';
 import { JwtService } from '@nestjs/jwt';
+import { UserTenantMappingService } from 'src/user-tenant-mapping/user-tenant-mapping.service';
+import { User, UserSchema } from 'src/users/user.schema';
 
 @Injectable()
 export class AuthService {
   constructor(
     private configService: ConfigService,
     private tenantConnectionService: TenantConnectionService,
-    private usersService: UsersService,
+    private userTenantMappingService: UserTenantMappingService,
     private jwtService: JwtService
   ) {}
 
   async login(credentials: CredentialsDto) {
     //Find if user exists by email
     const { email, password } = credentials;
-    const user = await this.usersService.getUserByEmail(email);
+    const mappedUser = await this.userTenantMappingService.getUserByEmail(
+      email
+    );
 
-    if (!user) {
+    console.log('mappedUser', mappedUser);
+
+    if (!mappedUser) {
       throw new UnauthorizedException('Wrong credentials');
     }
+
+    //get tenant specific user model
+    const { tenantId } = mappedUser;
+    console.log('tenantId', tenantId);
+    const UserModel = await this.tenantConnectionService.getTenantModel(
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
+      tenantId as unknown as string
+    );
+
+    console.log('UserModel', UserModel);
+
+    //find user by email
+    const user = await UserModel.findOne({ email });
+    console.log('user', user);
 
     //Compare entered password with existing password
     const passwordMatch = await bcrypt.compare(password, user.password);

@@ -8,7 +8,7 @@ export const tenantConnectionProvider = {
   useFactory: async (request, connection: Connection) => {
     if (!request.tenantId) {
       throw new InternalServerErrorException(
-        'Make sure to apply tenantsMiddleware',
+        'Make sure to apply tenantsMiddleware'
       );
     }
     return connection.useDb(`tenant_${request.tenantId}`);

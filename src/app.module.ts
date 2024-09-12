@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import config from './config/config';
 import { JwtModule } from '@nestjs/jwt';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { UserTenantMappingModule } from './user-tenant-mapping/user-tenant-mapping.module';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (config) => ({
+      useFactory: async config => ({
         uri: config.get('database.connectionString'),
       }),
       inject: [ConfigService],
@@ -30,6 +31,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
     ProductsModule,
     UsersModule,
     AuthModule,
+    UserTenantMappingModule,
   ],
   controllers: [],
   providers: [],

@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Inject, Injectable } from '@nestjs/common';
 import { User } from './user.schema';
 import { Model } from 'mongoose';
 import UserDto from './user.dto';
@@ -7,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private UserModel: Model<User>) {}
+  constructor(@Inject('USER_MODEL') private UserModel: Model<User>) {}
 
   async getUserByEmail(email: string) {
     return this.UserModel.findOne({ email });

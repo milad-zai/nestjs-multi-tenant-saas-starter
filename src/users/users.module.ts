@@ -1,20 +1,17 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './user.schema';
+import { UserModels } from 'src/providers/user-models.provider';
+import { TenantsMiddleware } from 'src/middlewares/tenants.middleware';
+import { tenantConnectionProvider } from 'src/providers/tenant-connection.provider';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      {
-        name: User.name,
-        schema: UserSchema,
-      },
-    ]),
-  ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, tenantConnectionProvider, UserModels.userModel],
   exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TenantsMiddleware).forRoutes(UsersController);
+  }
+}

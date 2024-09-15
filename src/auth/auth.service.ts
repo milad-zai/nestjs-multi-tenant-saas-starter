@@ -27,15 +27,13 @@ export class AuthService {
       email
     );
 
-    console.log('mappedUser', mappedUser);
-
     if (!mappedUser) {
       throw new UnauthorizedException('Wrong credentials');
     }
 
     //get tenant specific user model
     const { tenantId } = mappedUser;
-    console.log('tenantId', tenantId);
+
     const UserModel = await this.tenantConnectionService.getTenantModel(
       {
         name: User.name,
@@ -44,11 +42,8 @@ export class AuthService {
       tenantId as unknown as string
     );
 
-    console.log('UserModel', UserModel);
-
     //find user by email
     const user = await UserModel.findOne({ email });
-    console.log('user', user);
 
     //Compare entered password with existing password
     const passwordMatch = await bcrypt.compare(password, user.password);
@@ -89,6 +84,17 @@ export class AuthService {
 
     //Store the encrypted secret key
     await SecretsModel.create({ jwtSecret: encryptedSecret });
+  }
+
+  async removeSecretKeyForTenant(tenantId: string) {
+    const SecretsModel = await this.tenantConnectionService.getTenantModel(
+      {
+        name: Secrets.name,
+        schema: SecretsSchema,
+      },
+      tenantId
+    );
+    await SecretsModel.deleteOne();
   }
 
   async fetchAccessTokenSecretSigningKey(tenantId: string) {

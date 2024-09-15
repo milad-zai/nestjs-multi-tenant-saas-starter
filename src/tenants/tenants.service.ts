@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Tenant } from './tenant.schema';
 import { Model } from 'mongoose';
@@ -12,6 +17,8 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class TenantsService {
+  private readonly logger = new Logger(TenantsService.name);
+
   constructor(
     @InjectModel(Tenant.name)
     private TenantModel: Model<Tenant>,
@@ -25,54 +32,94 @@ export class TenantsService {
   }
 
   async createCompany(companyData: CreateCompanyDto) {
-    //Verify user does not already exist
+    // Step 1: Check if user already exists
     const user = await this.userTenantMappingService.getUserByEmail(
       companyData.user.email
     );
-
-    console.log('user', user);
 
     if (user) {
       throw new BadRequestException('User exists and belongs to a company...');
     }
 
-    //Create a tenant Id
-    const tenantId = nanoid(12);
-    console.log(tenantId);
+    const session = await this.TenantModel.db.startSession();
+    session.startTransaction(); // Start transaction to ensure atomicity
 
-    //Create a tenant secret
-    await this.authService.createSecretKeyForNewTenant(tenantId);
+    try {
+      // Step 2: Create a tenant ID
+      const tenantId = nanoid(12);
+      this.logger.log(`Generated tenant ID: ${tenantId}`);
 
-    console.log('secret key created');
+      // Step 3: Create a tenant record in master DB
+      await this.TenantModel.create(
+        [{ companyName: companyData.companyName, tenantId }],
+        { session }
+      );
+      this.logger.log('Tenant record created successfully.');
 
-    //Create Tenant Record
-    await this.TenantModel.create({
-      companyName: companyData.companyName,
-      tenantId,
-    });
+      // Step 4: Create user-tenant mapping in master DB (within the same transaction)
+      await this.userTenantMappingService.create(
+        { email: companyData.user.email, tenantId },
+        session
+      );
+      this.logger.log('User-tenant mapping created successfully.');
 
-    console.log('Tenant created');
+      // Step 5: Create tenant secret key (tenant-specific DB)
+      try {
+        await this.authService.createSecretKeyForNewTenant(tenantId);
+        this.logger.log('Secret key created for tenant.');
+      } catch (error) {
+        this.logger.error(
+          'Error creating tenant secret key. Rolling back...',
+          error
+        );
+        await session.abortTransaction(); // Rollback master DB changes
+        throw new InternalServerErrorException(
+          'Failed to create tenant secret key'
+        );
+      }
 
-    //Create userTenantMapping record
-    await this.userTenantMappingService.create({
-      email: companyData.user.email,
-      tenantId,
-    });
+      // Step 6: Create tenant-specific user model (tenant-specific DB)
+      try {
+        const UsersModel = await this.tenantConnectionService.getTenantModel(
+          { name: User.name, schema: UserSchema },
+          tenantId
+        );
+        companyData.user.password = await bcrypt.hash(
+          companyData.user.password,
+          10
+        );
+        await UsersModel.create([{ ...companyData.user, tenantId }]);
+        this.logger.log('User created in tenant-specific database.');
+      } catch (error) {
+        this.logger.error(
+          'Error creating user in tenant-specific DB. Rolling back...',
+          error
+        );
+        await session.abortTransaction(); // Rollback master DB changes
 
-    //Create tenant specific user
-    const UsersModel = await this.tenantConnectionService.getTenantModel(
-      {
-        name: User.name,
-        schema: UserSchema,
-      },
-      tenantId
-    );
+        //remove tenant database
+        try {
+          await this.authService.removeSecretKeyForTenant(tenantId);
+        } catch (error) {
+          this.logger.error('Error removing tenant secret key.', error);
+        }
 
-    //Store the encrypted secret key
-    companyData.user.password = await bcrypt.hash(
-      companyData.user.password,
-      10
-    );
-    await UsersModel.create({ ...companyData.user, tenantId });
+        throw new InternalServerErrorException(
+          'Failed to create user in tenant-specific DB'
+        );
+      }
+
+      // Commit transaction if all steps succeed
+      await session.commitTransaction();
+    } catch (error) {
+      // Rollback transaction on error
+      await session.abortTransaction();
+      this.logger.error(`Error creating company: ${error.message}`);
+      throw new InternalServerErrorException(
+        error.message || 'Error occurred while creating company and user.'
+      );
+    } finally {
+      session.endSession();
+    }
   }
 }

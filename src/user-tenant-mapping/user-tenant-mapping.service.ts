@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserTenantMappingDto } from './dto/create-user-tenant-mapping.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import UserTenantMapping from './schema/user-tenant-mapping.schema';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 
 @Injectable()
 export class UserTenantMappingService {
@@ -15,8 +15,13 @@ export class UserTenantMappingService {
     return this.UserTenantMappingModel.findOne({ email });
   }
 
-  create(createUserTenantMappingDto: CreateUserTenantMappingDto) {
-    return this.UserTenantMappingModel.create(createUserTenantMappingDto);
+  async create(
+    createUserTenantMappingDto: CreateUserTenantMappingDto,
+    session: ClientSession
+  ) {
+    return this.UserTenantMappingModel.create([createUserTenantMappingDto], {
+      session,
+    });
   }
 
   findOne(email: string) {

@@ -1,8 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { User } from './user.schema';
+import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
-import UserDto from './user.dto';
+import CreateUserDto from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { nanoid } from 'nanoid';
+import PatchUserDto from './dto/patch-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -12,8 +14,33 @@ export class UsersService {
     return this.UserModel.findOne({ email });
   }
 
-  async createUser(user: UserDto, tenantId: string) {
+  async getUserById(id: string) {
+    return this.UserModel.findById(id);
+  }
+
+  async findByIdAndUpdate(id: string, user: PatchUserDto) {
+    return this.UserModel.findByIdAndUpdate(
+      id,
+      { $set: user }, // Only update the fields present in userData
+      { new: true } // Return the updated document
+    );
+  }
+
+  async createUser(user: CreateUserDto, tenantId: string) {
     user.password = await bcrypt.hash(user.password, 10);
     return this.UserModel.create({ ...user, tenantId });
+  }
+
+  async sendInvitationLink(email: string) {
+    const invitationToken = nanoid();
+    const user = await this.UserModel.findOneAndUpdate(
+      { email },
+      { invitationToken },
+      { new: true }
+    );
+
+    //todo: send invitation email
+
+    return { invitationToken, user };
   }
 }

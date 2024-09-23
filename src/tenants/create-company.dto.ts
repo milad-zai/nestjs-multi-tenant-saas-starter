@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import UserDto from 'src/users/user.dto';
+import CreateUserDto from 'src/users/dto/create-user.dto';
 
 export default class CreateCompanyDto {
   @ApiProperty()
   readonly companyName: string;
 
   @ApiProperty()
-  readonly user: UserDto;
+  readonly user: CreateUserDto;
 }

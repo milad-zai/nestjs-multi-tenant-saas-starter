@@ -12,7 +12,7 @@ import { nanoid } from 'nanoid';
 import { AuthService } from 'src/auth/auth.service';
 import { UserTenantMappingService } from 'src/user-tenant-mapping/user-tenant-mapping.service';
 import { TenantConnectionService } from 'src/services/tenant-connection.service';
-import { User, UserSchema } from 'src/users/user.schema';
+import { User, UserSchema } from 'src/users/schema/user.schema';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()

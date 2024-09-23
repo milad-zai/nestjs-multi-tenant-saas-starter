@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { decrypt } from 'src/utils/decrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserTenantMappingService } from 'src/user-tenant-mapping/user-tenant-mapping.service';
-import { User, UserSchema } from 'src/users/user.schema';
+import { User, UserSchema } from 'src/users/schema/user.schema';
 
 @Injectable()
 export class AuthService {

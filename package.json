@@ -1,10 +1,10 @@
 {
-  "name": "team-management",
+  "name": "nestjs-multi-tenant-saas-starter",
   "version": "0.0.1",
-  "description": "team management backend",
+  "description": "A scalable and easy-to-use starter project for building multi-tenant SaaS applications using NestJS and MongoDB with a database-per-tenant architecture.",
   "author": "Milad Ahmad Zai",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

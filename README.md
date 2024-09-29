@@ -1,30 +1,51 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# NestJS Multi-Tenant SaaS Starter
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A scalable and easy-to-use starter project for building **multi-tenant SaaS applications** using **NestJS** and **MongoDB** with a **database-per-tenant** architecture.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- 🏢 **Multi-Tenancy**: Database-per-tenant model for complete tenant data isolation.
+- 👤 **Tenant Owners & Users**: Tenant owner can create or invite users within their organization.
+- 🔐 **Authentication**: Login for both tenant owners and regular users.
+- 🔀 **Dynamic Tenant Database Connection**: Switches to the appropriate tenant database based on user credentials.
+- 🛡 **Per-Tenant Secret Keys**: A unique secret key is generated and stored in each tenant's database, ensuring isolated security measures for token signing and sensitive operations.
+- 💻 **NestJS Framework**: A robust and modular architecture based on NestJS.
+- 🌿 **MongoDB & Mongoose**: MongoDB as the database and Mongoose as the ORM for tenant management.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Technologies Used
+
+- **NestJS**: The core framework used to build the server-side application.
+- **MongoDB**: Each tenant has its own isolated MongoDB database.
+- **Mongoose**: Object Data Modeling (ODM) library for MongoDB.
+- **JWT Authentication**: Secure authentication using JSON Web Tokens (JWT).
+
+## Upcoming Features
+
+I am actively working on adding the following features to this starter project:
+
+- **Role-Based Access Control (RBAC)**:
+  Implementing user roles such as `Owner`, `Admin`, and `User` with fine-grained permission management.
+  Owners will have full access to manage tenants and users, while admins and users will have restricted access based on their role.
+- **Customizable Roles**:
+  Allow tenant owners to define and manage custom roles for more flexible access control.
+
+- **Audit Logs**:
+  Implementing audit logs to track important actions like user logins, data changes, and admin actions for better security and transparency.
+
+- **Email Notifications**:
+  Integrating email notifications for events like user invitations, password resets, and important tenant actions.
+
+- **Improved User Management**:
+  Enhancing the user management module with features like bulk user import, detailed user activity tracking, and advanced search and filtering.
+
+Stay tuned for updates! Feel free to open an issue if you have any feature requests or suggestions.
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** v14 or later
+- **MongoDB** server instance
 
 ## Installation
 
@@ -45,29 +66,6 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is licensed under the MIT License. You are free to use, modify, and distribute this software. Please credit the original author.
